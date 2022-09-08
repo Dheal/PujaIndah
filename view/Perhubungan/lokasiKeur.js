@@ -44,7 +44,7 @@ function LokasiKeur({navigation}) {
       },
     })
       .then(response => {
-        // console.log(response.data.data);
+        console.log(response.data.data);
         setIsLoading(false);
         setListTitikRawan(response.data.data);
         setFilterTitikRawan(response.data.data);
