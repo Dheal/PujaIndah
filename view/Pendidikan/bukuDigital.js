@@ -25,7 +25,8 @@ import {
 } from 'react-native-responsive-screen';
 import MapView, {Marker} from 'react-native-maps';
 import {Picker} from '@react-native-picker/picker';
-import dataJson from '../../locales/m_daerah.json';
+import getDataJson from '../../locales/m_daerah.json';
+import SearchableDropdown from 'react-native-searchable-dropdown';
 
 function BukuDigital({navigation}) {
   const [nama, setNama] = useState('');
@@ -36,18 +37,20 @@ function BukuDigital({navigation}) {
   const [idDaerah, setIdDaerah] = useState('');
   const [dataBuku, setDataBuku] = useState([]);
 
-  const getDataJson = dataJson.map(item => {
+  const items = getDataJson.map(item => {
     const data = {};
     data.id = item.id;
-    data.m_daerah_id = item.m_daerah_id;
-    data.nama = item.nama;
+    data.name = item.nama;
     return data;
   });
 
-  const getData = async () => {
+  const getData = async value => {
     Axios({
       url:
-        url + `/public/pend_ebook?m_daerah_id=${idDaerah}&page=0&per_page=20`,
+        url +
+        `/public/pend_ebook?m_daerah_id=${
+          !value ? idDaerah : value
+        }&page=0&per_page=20`,
       method: 'get',
       headers: {
         Authorization: 'Bearer ' + (await AsyncStorage.getItem('token')),
@@ -61,10 +64,6 @@ function BukuDigital({navigation}) {
       });
   };
 
-  if (cari) {
-    getData();
-  }
-
   const renderItem = ({item}) => {
     return (
       <>
@@ -74,7 +73,11 @@ function BukuDigital({navigation}) {
               <Image
                 resizeMode="stretch"
                 style={{width: 150, height: '90%', margin: 10}}
-                source={{uri: item?.cover}}
+                source={{
+                  uri: !item?.cover
+                    ? 'https://indonesia.go.id/assets/upload/headline/1570616120_Puja_Indah_thumb.jpg'
+                    : item?.cover,
+                }}
               />
             </View>
             <View
@@ -154,62 +157,53 @@ function BukuDigital({navigation}) {
           </View>
         </View>
         <View style={styles.container}>
-          <View
-            style={{
-              marginTop: hp('1%'),
-              marginBottom: hp('2%'),
-            }}>
-            <View style={{marginTop: 5}}>
-              <Text style={styles.text}>Nama Daerah</Text>
-            </View>
-            <View style={[styles.drbDown, {justifyContent: 'center'}]}>
-              <Picker
-                mode="dropdown"
-                selectedValue={idDaerah}
-                onValueChange={(itemValue, itemIndex) => {
-                  setIdDaerah(itemValue);
-                }}>
-                <Picker.Item
-                  label="Pilih Daerah"
-                  value=""
-                  style={{color: '#b0b0b0', fontSize: 14}}
-                />
-                {getDataJson.map((item, index) => {
-                  return (
-                    <Picker.Item
-                      key={index}
-                      label={item.nama}
-                      value={item.m_daerah_id}
-                      style={{fontSize: 14}}
-                    />
-                  );
-                })}
-              </Picker>
-            </View>
-            <View>
-              <TouchableOpacity
-                style={styles.buttonLogin}
-                onPress={() => {
-                  setCari(true);
-                }}>
-                <Text style={styles.textButton}>Cari</Text>
-              </TouchableOpacity>
-            </View>
+          <View style={{marginTop: 5}}>
+            <Text style={styles.text}>Nama Daerah</Text>
           </View>
+          <SearchableDropdown
+            onItemSelect={item => {
+              getData(item.id);
+            }}
+            containerStyle={{padding: 5}}
+            onRemoveItem={(item, index) => {
+              setIdDaerah(item);
+            }}
+            itemStyle={{
+              padding: 10,
+              marginTop: 2,
+              backgroundColor: '#ddd',
+              borderColor: '#bbb',
+              borderWidth: 1,
+              borderRadius: 5,
+            }}
+            itemTextStyle={{color: '#222'}}
+            itemsContainerStyle={{height: '100%'}}
+            items={items}
+            resetValue={false}
+            textInputProps={{
+              placeholder: 'Cari Nama Daerah',
+              underlineColorAndroid: 'transparent',
+              style: {
+                padding: 12,
+                borderWidth: 1,
+                borderColor: '#ccc',
+                borderRadius: 5,
+              },
+            }}
+            listProps={{
+              nestedScrollEnabled: true,
+            }}
+          />
         </View>
         <View style={[styles.container, {flex: 1}]}>
-          {cari ? (
-            <>
-              <View style={{marginTop: 20}}>
-                <FlatList
-                  data={dataBuku}
-                  renderItem={renderItem}
-                  keyExtractor={(item, index) => index.toString()}
-                  showsVerticalScrollIndicator={false}
-                />
-              </View>
-            </>
-          ) : null}
+          <View style={{marginTop: 20}}>
+            <FlatList
+              data={dataBuku}
+              renderItem={renderItem}
+              keyExtractor={(item, index) => index.toString()}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
         </View>
       </View>
     </>

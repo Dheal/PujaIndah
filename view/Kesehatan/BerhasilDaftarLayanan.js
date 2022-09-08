@@ -179,6 +179,27 @@ function BerhasilDaftarLayanan({navigation, route}) {
               }}
             />
           </View>
+          <View style={{marginTop: hp('1%')}}>
+            <View style={{flexDirection: 'row'}}>
+              <View style={{width: wp('30%')}}>
+                <Text>Nakes</Text>
+              </View>
+              <View>
+                <Text>:</Text>
+              </View>
+              <View style={{marginLeft: 10, flex: 1}}>
+                <Text>{item?.nakes}</Text>
+              </View>
+            </View>
+            <View
+              style={{
+                borderTopWidth: 2,
+                marginTop: hp('1%'),
+                borderColor: '#758097',
+                opacity: 0.5,
+              }}
+            />
+          </View>
         </View>
         {/* Card Pendaftaran */}
         <View style={{marginTop: hp('5%'), marginBottom: hp('5%')}}>

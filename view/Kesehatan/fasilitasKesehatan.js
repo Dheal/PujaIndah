@@ -34,16 +34,23 @@ import {
 } from 'react-native-responsive-screen';
 import MapView, {Marker} from 'react-native-maps';
 import GetLocation from 'react-native-get-location';
+import SearchableDropdown from 'react-native-searchable-dropdown';
+import getDataJson from '../../locales/m_daerah.json';
 
 function FasilitasKesehatan({navigation}) {
   const [isLoading, setIsLoading] = useState(false);
   const [fasilitasKesesahat, setFasilitasKesehatan] = useState([]);
   const [search, setSearch] = useState([]);
 
-  const getData = async () => {
+  const getData = async value => {
+    const idDaerah = await AsyncStorage.getItem('m_daerah_id');
     setIsLoading(true);
     Axios({
-      url: url + `/public/pus_puskesmas?search=${search}&page=0&per_page=20`,
+      url:
+        url +
+        `/public/pus_puskesmas?m_daerah_id=${
+          !value ? idDaerah : value
+        }&page=0&per_page=20`,
       method: 'get',
       headers: {
         Authorization: 'Bearer ' + (await AsyncStorage.getItem('token')),
@@ -57,6 +64,12 @@ function FasilitasKesehatan({navigation}) {
         console.log(error);
       });
   };
+  const items = getDataJson.map(item => {
+    const data = {};
+    data.id = item.id;
+    data.name = item.nama;
+    return data;
+  });
 
   const renderItem = ({item}) => {
     return (
@@ -163,8 +176,41 @@ function FasilitasKesehatan({navigation}) {
             </Text>
           </View>
         </View>
-
-        <View
+        <View style={{paddingHorizontal: 10}}>
+          <SearchableDropdown
+            onItemSelect={item => {
+              getData(item.id);
+              console.log(item.id);
+            }}
+            containerStyle={{padding: 5}}
+            itemStyle={{
+              padding: 10,
+              marginTop: 2,
+              backgroundColor: '#ddd',
+              borderColor: '#bbb',
+              borderWidth: 1,
+              borderRadius: 5,
+            }}
+            itemTextStyle={{color: '#222'}}
+            itemsContainerStyle={{height: '100%'}}
+            items={items}
+            resetValue={false}
+            textInputProps={{
+              placeholder: 'Cari Nama Daerah',
+              underlineColorAndroid: 'transparent',
+              style: {
+                padding: 12,
+                borderWidth: 1,
+                borderColor: '#ccc',
+                borderRadius: 5,
+              },
+            }}
+            listProps={{
+              nestedScrollEnabled: true,
+            }}
+          />
+        </View>
+        {/* <View
           style={{
             flexDirection: 'row',
             marginHorizontal: 10,
@@ -186,7 +232,7 @@ function FasilitasKesehatan({navigation}) {
               <FontAwesomeIcon color="grey" size={20} icon={faSearch} />
             </TouchableOpacity>
           </View>
-        </View>
+        </View> */}
 
         {isLoading ? (
           <View

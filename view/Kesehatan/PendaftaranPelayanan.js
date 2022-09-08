@@ -36,7 +36,7 @@ function PendaftaranPelayananKesehatan({navigation, route}) {
   const [nama, setNama] = useState('');
   const [email, setEmail] = useState('');
   const [nik, setNik] = useState('');
-  const [idKategoriAduan, setIdKategoriAduan] = useState();
+  const [idKelamin, setIdKelamin] = useState();
   const [profil, setProfil] = useState({});
   const [showTanggal, setShowTanggal] = useState(false);
   const [tanggal, setTanggal] = useState('');
@@ -49,6 +49,12 @@ function PendaftaranPelayananKesehatan({navigation, route}) {
   const [message, setMessage] = useState('');
   const [modalVisibleSukses, setModalVisibleSukses] = useState(false);
   const [statusData, setStatusData] = useState();
+  const [tempatLahir, setTempatLahir] = useState('');
+  const [tinggiBadan, setTinggiBadan] = useState('');
+  const [beratBadan, setBeratBadan] = useState('');
+  const [riwayatKesehatan, setRiwayatKesehatan] = useState('');
+  const [alergiObat, setAlergiObat] = useState('');
+  const [alerigiMakanan, setAlergiMakanan] = useState('');
 
   const getProfil = async () => {
     Axios({
@@ -76,7 +82,7 @@ function PendaftaranPelayananKesehatan({navigation, route}) {
       },
     })
       .then(response => {
-        console.log('data poli', response.data.data);
+        // console.log('data poli', response.data.data);
       })
       .catch(error => {
         console.log(error);
@@ -108,12 +114,27 @@ function PendaftaranPelayananKesehatan({navigation, route}) {
   const handleDaftar = async () => {
     Axios({
       url: url + '/faskes/daftar/' + faskes.id,
-      method: 'get',
+      method: 'post',
       headers: {
         Authorization: 'Bearer ' + (await AsyncStorage.getItem('token')),
       },
+      data: {
+        nik: profil.nik,
+        nama: profil.name,
+        alamat: !profil.alamat ? '' : profil.alamat,
+        kelamin: idKelamin,
+        tempat_lahir: tempatLahir,
+        tanggal_lahir: '',
+        no_hp: '',
+        riwayat_kesehatan: riwayatKesehatan,
+        alergi_makanan: alerigiMakanan,
+        alergi_obat: alergiObat,
+        tinggi_badan: tinggiBadan,
+        berat_badan: beratBadan,
+      },
     })
       .then(response => {
+        console.log(response);
         setModalVisibleSukses(true);
         setStatusData(200);
         setTimeout(() => {
@@ -299,7 +320,7 @@ function PendaftaranPelayananKesehatan({navigation, route}) {
             <View style={styles.boxInput}>
               <TextInput
                 style={styles.textInput}
-                onChangeText={val => setNik(val)}
+                onChangeText={val => setTempatLahir(val)}
                 placeholder="Tempat Lahir"
               />
             </View>
@@ -309,9 +330,9 @@ function PendaftaranPelayananKesehatan({navigation, route}) {
             <View style={[styles.drbDown, {justifyContent: 'center'}]}>
               <Picker
                 mode="dropdown"
-                selectedValue={idKategoriAduan}
+                selectedValue={idKelamin}
                 onValueChange={(itemValue, itemIndex) => {
-                  setIdKategoriAduan(itemValue);
+                  setIdKelamin(itemValue);
                 }}>
                 <Picker.Item
                   label="Pilih Kategori"
@@ -320,12 +341,12 @@ function PendaftaranPelayananKesehatan({navigation, route}) {
                 />
                 <Picker.Item
                   label="Laki-Laki"
-                  value="java"
+                  value="L"
                   style={{fontSize: 14}}
                 />
                 <Picker.Item
                   label="Perempuan"
-                  value="js"
+                  value="P"
                   style={{fontSize: 14}}
                 />
               </Picker>
@@ -337,7 +358,7 @@ function PendaftaranPelayananKesehatan({navigation, route}) {
               <TextInput
                 keyboardType="numeric"
                 style={[styles.textInput, {flex: 5}]}
-                onChangeText={val => setNik(val)}
+                onChangeText={val => setTinggiBadan(val)}
                 placeholder="Tinggi Badan"
               />
               <View
@@ -358,7 +379,7 @@ function PendaftaranPelayananKesehatan({navigation, route}) {
               <TextInput
                 keyboardType="numeric"
                 style={[styles.textInput, {flex: 5}]}
-                onChangeText={val => setNik(val)}
+                onChangeText={val => setBeratBadan(val)}
                 placeholder="Berat Badan"
               />
               <View
@@ -378,7 +399,7 @@ function PendaftaranPelayananKesehatan({navigation, route}) {
             <View style={styles.boxInput}>
               <TextInput
                 style={styles.textInput}
-                onChangeText={val => setNik(val)}
+                onChangeText={val => setRiwayatKesehatan(val)}
                 placeholder="Riwayat Kesehatan"
               />
             </View>
@@ -388,7 +409,7 @@ function PendaftaranPelayananKesehatan({navigation, route}) {
             <View style={styles.boxInput}>
               <TextInput
                 style={styles.textInput}
-                onChangeText={val => setNik(val)}
+                onChangeText={val => setAlergiObat(val)}
                 placeholder="Alergi Obat"
               />
             </View>
@@ -398,7 +419,7 @@ function PendaftaranPelayananKesehatan({navigation, route}) {
             <View style={styles.boxInput}>
               <TextInput
                 style={styles.textInput}
-                onChangeText={val => setNik(val)}
+                onChangeText={val => setAlergiMakanan(val)}
                 placeholder="Alergi Makanan"
               />
             </View>

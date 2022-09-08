@@ -34,25 +34,28 @@ import {
 } from 'react-native-responsive-screen';
 import MapView, {Marker} from 'react-native-maps';
 import GetLocation from 'react-native-get-location';
+import SearchableDropdown from 'react-native-searchable-dropdown';
+import getDataJson from '../../locales/m_daerah.json';
 
 function GawatDarurat({navigation}) {
   const [dataGawatDarurat, setDataGawatDarurat] = useState([]);
-  const [search, setSearch] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const getData = async () => {
+  const getData = async value => {
+    const idDaerah = await AsyncStorage.getItem('m_daerah_id');
     setIsLoading(true);
     Axios({
       url:
         url +
-        `/public/pus_puskesmas?search=${search}&igd_id=1&page=0&per_page=20`,
+        `/public/pus_puskesmas?m_daerah_id=${
+          !value ? idDaerah : value
+        }&igd=1&page=0&per_page=20`,
       method: 'get',
       headers: {
         Authorization: 'Bearer ' + (await AsyncStorage.getItem('token')),
       },
     })
       .then(response => {
-        console.log('ini data', response?.data?.data);
         setDataGawatDarurat(response?.data?.data);
         setIsLoading(false);
       })
@@ -60,6 +63,12 @@ function GawatDarurat({navigation}) {
         console.log(error);
       });
   };
+  const items = getDataJson.map(item => {
+    const data = {};
+    data.id = item.id;
+    data.name = item.nama;
+    return data;
+  });
 
   const renderItem = ({item}) => {
     return (
@@ -151,14 +160,45 @@ function GawatDarurat({navigation}) {
             </Text>
           </View>
         </View>
-
+        <View style={{paddingHorizontal: 10}}>
+          <SearchableDropdown
+            onItemSelect={item => {
+              getData(item.id);
+            }}
+            containerStyle={{padding: 5}}
+            itemStyle={{
+              padding: 10,
+              marginTop: 2,
+              backgroundColor: '#ddd',
+              borderColor: '#bbb',
+              borderWidth: 1,
+              borderRadius: 5,
+            }}
+            itemTextStyle={{color: '#222'}}
+            itemsContainerStyle={{height: '100%'}}
+            items={items}
+            resetValue={false}
+            textInputProps={{
+              placeholder: 'Cari Nama Daerah',
+              underlineColorAndroid: 'transparent',
+              style: {
+                padding: 12,
+                borderWidth: 1,
+                borderColor: '#ccc',
+                borderRadius: 5,
+              },
+            }}
+            listProps={{
+              nestedScrollEnabled: true,
+            }}
+          />
+        </View>
         <View
           style={{
             flexDirection: 'row',
             marginHorizontal: 10,
-            marginTop: hp('2%'),
           }}>
-          <View style={[styles.boxInput, {flexDirection: 'row', flex: 4}]}>
+          {/* <View style={[styles.boxInput, {flexDirection: 'row', flex: 4}]}>
             <TextInput
               style={[styles.textInput, {flex: 5, fontSize: 12, height: 40}]}
               // onChangeText={val => setFilter(val)}
@@ -173,7 +213,7 @@ function GawatDarurat({navigation}) {
               }}>
               <FontAwesomeIcon color="grey" size={20} icon={faSearch} />
             </TouchableOpacity>
-          </View>
+          </View> */}
         </View>
         {isLoading ? (
           <View

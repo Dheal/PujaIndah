@@ -33,6 +33,8 @@ import {
   widthPercentageToDP as wp,
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
+import SearchableDropdown from 'react-native-searchable-dropdown';
+import getDataJson from '../../locales/m_daerah.json';
 
 function DaftarPerizinan({navigation}) {
   const [filterTitikRawan, setFilterTitikRawan] = useState([]);
@@ -41,11 +43,15 @@ function DaftarPerizinan({navigation}) {
   const [dataPerizinan, setDataPerizinan] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const getListDataPerizinan = async () => {
+  const getData = async value => {
+    const idDaerah = await AsyncStorage.getItem('m_daerah_id');
     setIsLoading(true);
     Axios({
       url:
-        url + `/public/perizinan_layanan?search=${filter}&page=0&per_page=20`,
+        url +
+        `/public/perizinan_layanan?m_daerah_id=${
+          !value ? idDaerah : value
+        }&page=0&per_page=20`,
       method: 'get',
       headers: {
         Authorization: 'Bearer ' + (await AsyncStorage.getItem('token')),
@@ -59,6 +65,13 @@ function DaftarPerizinan({navigation}) {
         console.log(error);
       });
   };
+
+  const items = getDataJson.map(item => {
+    const data = {};
+    data.id = item.id;
+    data.name = item.nama;
+    return data;
+  });
 
   const renderItem = ({item}) => {
     return (
@@ -142,7 +155,7 @@ function DaftarPerizinan({navigation}) {
   };
 
   useEffect(() => {
-    getListDataPerizinan();
+    getData();
   }, []);
 
   useEffect(() => {
@@ -187,7 +200,40 @@ function DaftarPerizinan({navigation}) {
             </Text>
           </View>
         </View>
-        <View
+        <View style={{paddingHorizontal: 10}}>
+          <SearchableDropdown
+            onItemSelect={item => {
+              getData(item.id);
+            }}
+            containerStyle={{padding: 5}}
+            itemStyle={{
+              padding: 10,
+              marginTop: 2,
+              backgroundColor: '#ddd',
+              borderColor: '#bbb',
+              borderWidth: 1,
+              borderRadius: 5,
+            }}
+            itemTextStyle={{color: '#222'}}
+            itemsContainerStyle={{height: '100%'}}
+            items={items}
+            resetValue={false}
+            textInputProps={{
+              placeholder: 'Cari Nama Daerah',
+              underlineColorAndroid: 'transparent',
+              style: {
+                padding: 12,
+                borderWidth: 1,
+                borderColor: '#ccc',
+                borderRadius: 5,
+              },
+            }}
+            listProps={{
+              nestedScrollEnabled: true,
+            }}
+          />
+        </View>
+        {/* <View
           style={{
             flexDirection: 'row',
             marginHorizontal: 20,
@@ -209,7 +255,7 @@ function DaftarPerizinan({navigation}) {
               <FontAwesomeIcon color="grey" size={20} icon={faSearch} />
             </TouchableOpacity>
           </View>
-        </View>
+        </View> */}
 
         {isLoading ? (
           <View

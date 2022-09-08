@@ -30,7 +30,8 @@ import {
 } from 'react-native-responsive-screen';
 import DateTimePickerModal from 'react-native-modal-datetime-picker';
 import {faClock} from '@fortawesome/free-regular-svg-icons';
-import dataJson from '../../locales/m_daerah.json';
+import getDataJson from '../../locales/m_daerah.json';
+import SearchableDropdown from 'react-native-searchable-dropdown';
 
 function Beasiswa({navigation}) {
   const [nama, setNama] = useState('');
@@ -39,11 +40,10 @@ function Beasiswa({navigation}) {
   const [tanggal, setTanggal] = useState('');
   const [idDaerah, setIdDaerah] = useState('');
 
-  const getDataJson = dataJson.map(item => {
+  const items = getDataJson.map(item => {
     const data = {};
     data.id = item.id;
-    data.m_daerah_id = item.m_daerah_id;
-    data.nama = item.nama;
+    data.name = item.nama;
     return data;
   });
 
@@ -53,7 +53,6 @@ function Beasiswa({navigation}) {
         style={{
           flex: 1,
           resizeMode: 'cover',
-          // justifyContent: 'center',
           backgroundColor: 'white',
         }}>
         <View
@@ -78,66 +77,48 @@ function Beasiswa({navigation}) {
             <Text style={[styles.textJudul, {color: 'white'}]}>Beasiswa</Text>
           </View>
         </View>
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.container}>
-            {/* <View>
-              <Text style={styles.text}>Nama Daerah</Text>
-            </View> */}
-            {/* <View style={styles.boxInput}>
-              <TextInput
-                style={styles.textInput}
-                onChangeText={val => setNama(val)}
-                placeholder="Nama Daerah"
-              />
-            </View> */}
-
-            <View style={{marginTop: 5}}>
-              <Text style={styles.text}>Nama Daerah</Text>
-            </View>
-            <View style={[styles.drbDown, {justifyContent: 'center'}]}>
-              <Picker
-                mode="dropdown"
-                selectedValue={idDaerah}
-                onValueChange={(itemValue, itemIndex) => {
-                  setIdDaerah(itemValue);
-                }}>
-                <Picker.Item
-                  label="Pilih Daerah"
-                  value=""
-                  style={{color: '#b0b0b0', fontSize: 14}}
-                />
-                {getDataJson.map((item, index) => {
-                  return (
-                    <Picker.Item
-                      key={index}
-                      label={item.nama}
-                      value={item.m_daerah_id}
-                      style={{fontSize: 14}}
-                    />
-                  );
-                })}
-              </Picker>
-            </View>
-
-            <View
-              style={{
-                marginTop: hp('1%'),
-                marginBottom: hp('5%'),
-              }}>
-              <View>
-                <TouchableOpacity
-                  style={styles.buttonLogin}
-                  onPress={() => {
-                    navigation.navigate('DaftarBeasiswa', {
-                      itemId: idDaerah,
-                    });
-                  }}>
-                  <Text style={styles.textButton}>Cari</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
+        <View style={styles.container}>
+          <View style={{marginTop: 5}}>
+            <Text style={styles.text}>Nama Daerah</Text>
           </View>
-        </ScrollView>
+          <SearchableDropdown
+            onItemSelect={item => {
+              setIdDaerah(item.id);
+              navigation.navigate('DaftarBeasiswa', {
+                itemId: idDaerah,
+              });
+            }}
+            containerStyle={{padding: 5}}
+            onRemoveItem={(item, index) => {
+              setIdDaerah(item);
+            }}
+            itemStyle={{
+              padding: 10,
+              marginTop: 2,
+              backgroundColor: '#ddd',
+              borderColor: '#bbb',
+              borderWidth: 1,
+              borderRadius: 5,
+            }}
+            itemTextStyle={{color: '#222'}}
+            itemsContainerStyle={{height: '100%'}}
+            items={items}
+            resetValue={false}
+            textInputProps={{
+              placeholder: 'Cari Nama Daerah',
+              underlineColorAndroid: 'transparent',
+              style: {
+                padding: 12,
+                borderWidth: 1,
+                borderColor: '#ccc',
+                borderRadius: 5,
+              },
+            }}
+            listProps={{
+              nestedScrollEnabled: true,
+            }}
+          />
+        </View>
       </View>
     </>
   );

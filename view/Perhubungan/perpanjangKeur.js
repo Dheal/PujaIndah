@@ -34,6 +34,7 @@ function PerpanjangKeur({navigation}) {
   const [lokasiUji, setLokasiUji] = useState('');
   const [modalVisibleSukses, setModalVisibleSukses] = useState(false);
   const [statusResp, setStatusResp] = useState('');
+  const [message, setMessage] = useState('');
 
   const getDataKendaraan = async () => {
     const idDaerah = await AsyncStorage.getItem('m_daerah_id');
@@ -85,7 +86,6 @@ function PerpanjangKeur({navigation}) {
       },
     })
       .then(response => {
-        setProfil(response.data.data);
         setStatusResp(200);
         setModalVisibleSukses(true);
         setTimeout(() => {
@@ -97,6 +97,7 @@ function PerpanjangKeur({navigation}) {
           setModalVisibleSukses(false);
         }, 2000);
         console.log('post perpanjangan', error.response);
+        setMessage(error.response.data.message);
       });
   };
 
@@ -319,9 +320,7 @@ function PerpanjangKeur({navigation}) {
                   marginTop: 20,
                   justifyContent: 'center',
                 }}>
-                {statusResp === 200
-                  ? 'Berhasil Perpanjangan KEUR'
-                  : 'Gagal Melakukan Perpanjangan Keur'}
+                {statusResp === 200 ? 'Berhasil Perpanjangan KEUR' : message}
               </Text>
             </View>
           </View>

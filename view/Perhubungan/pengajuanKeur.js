@@ -190,9 +190,6 @@ function PengajuanKeur({navigation}) {
       });
   };
 
-  const cekKirim = () => {
-    linkFotoKejadian === '' ? setModalHandleFoto(true) : handleSubmit();
-  };
   const handleSubmit = async () => {
     const idDaerah = await AsyncStorage.getItem('m_daerah_id');
     Axios({
@@ -202,10 +199,10 @@ function PengajuanKeur({navigation}) {
         Authorization: 'Bearer ' + (await AsyncStorage.getItem('token')),
       },
       data: {
-        m_daerah_id: 1,
+        m_daerah_id: idDaerah,
         nama: profil.name,
-        alamat: profil.alamat,
-        no_hp: profil.phone,
+        alamat: !profil.alamat ? '' : profil.alamat,
+        no_hp: !profil.phone ? '' : profil.phone,
         no_kendaraan: nomorKendaraan,
         jenis_kendaraan: jenisKendaraan,
         tahun_pembuatan: tahunPembuatan,
@@ -213,12 +210,13 @@ function PengajuanKeur({navigation}) {
         no_chasis: nomorChasis,
         no_mesin: nomorMesin,
         masa_berlaku_awal: tanggal,
-        foto_stnk: linkFotoKejadian,
+        foto_stnk: !linkFotoKejadian ? '' : linkFotoKejadian,
         lokasi_uji: lokasiUji,
         fungsi: fungsiKendaraan,
       },
     })
       .then(response => {
+        console.log(response);
         setModalVisibleSukses(true);
         setStatusData(200);
         setTimeout(() => {
@@ -226,6 +224,7 @@ function PengajuanKeur({navigation}) {
         }, 3000);
       })
       .catch(error => {
+        console.log(error.response);
         if (statusData !== 200) {
           setStatusData(error.response.status);
           setModalVisibleSukses(true);
@@ -236,7 +235,6 @@ function PengajuanKeur({navigation}) {
       });
   };
 
-  console.log(profil);
   useEffect(() => {
     getProfil();
     getLokasiKeur();
@@ -304,7 +302,8 @@ function PengajuanKeur({navigation}) {
           <View style={styles.modalView}>
             <Image
               style={{width: 50, height: 50}}
-              source={require('../../assets/image/warning.png')}></Image>
+              source={require('../../assets/image/warning.png')}
+            />
 
             <View style={{alignItems: 'center'}}>
               <Text
@@ -562,7 +561,8 @@ function PengajuanKeur({navigation}) {
                 style={[styles.textInput, {flex: 5}]}
                 // onChangeText={val => setJudulPengaduan(val)}
                 // placeholder="Judul Pengaduan"
-                editable={false}></TextInput>
+                editable={false}
+              />
               <TouchableOpacity
                 onPress={pilihFoto}
                 style={{
@@ -575,7 +575,9 @@ function PengajuanKeur({navigation}) {
               </TouchableOpacity>
             </View>
             <View style={styles.boxButton}>
-              <TouchableOpacity style={styles.buttonLogin} onPress={cekKirim}>
+              <TouchableOpacity
+                style={styles.buttonLogin}
+                onPress={handleSubmit}>
                 <Text style={styles.textButton}>Kirim</Text>
               </TouchableOpacity>
             </View>

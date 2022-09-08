@@ -24,23 +24,21 @@ import {
   heightPercentageToDP as hp,
 } from 'react-native-responsive-screen';
 import MapView, {Marker} from 'react-native-maps';
-import dataJson from '../../locales/m_daerah.json';
-import {Picker} from '@react-native-picker/picker';
+import getDataJson from '../../locales/m_daerah.json';
+import SearchableDropdown from 'react-native-searchable-dropdown';
 
 function MajalahDigital({navigation}) {
   const [nama, setNama] = useState('');
   const [idKategoriAduan, setIdKategoriAduan] = useState();
   const [showTanggal, setShowTanggal] = useState(false);
   const [tanggal, setTanggal] = useState('');
-  const [cari, setCari] = useState(false);
   const [idDaerah, setIdDaerah] = useState('');
   const [dataBuku, setDataBuku] = useState([]);
 
-  const getDataJson = dataJson.map(item => {
+  const items = getDataJson.map(item => {
     const data = {};
     data.id = item.id;
-    data.m_daerah_id = item.m_daerah_id;
-    data.nama = item.nama;
+    data.name = item.nama;
     return data;
   });
 
@@ -60,9 +58,6 @@ function MajalahDigital({navigation}) {
       });
   };
 
-  if (cari) {
-    getData();
-  }
   const renderItem = ({item}) => {
     return (
       <>
@@ -72,7 +67,11 @@ function MajalahDigital({navigation}) {
               <Image
                 resizeMode="stretch"
                 style={{width: 150, height: '90%', margin: 10}}
-                source={{uri: item?.cover}}
+                source={{
+                  uri: !item?.cover
+                    ? 'https://indonesia.go.id/assets/upload/headline/1570616120_Puja_Indah_thumb.jpg'
+                    : item?.cover,
+                }}
               />
             </View>
             <View
@@ -156,63 +155,56 @@ function MajalahDigital({navigation}) {
           <View style={{marginTop: 5}}>
             <Text style={styles.text}>Nama Daerah</Text>
           </View>
-          <View style={[styles.drbDown, {justifyContent: 'center'}]}>
-            <Picker
-              mode="dropdown"
-              selectedValue={idDaerah}
-              onValueChange={(itemValue, itemIndex) => {
-                setIdDaerah(itemValue);
-              }}>
-              <Picker.Item
-                label="Pilih Daerah"
-                value=""
-                style={{color: '#b0b0b0', fontSize: 14}}
-              />
-              {getDataJson.map((item, index) => {
-                return (
-                  <Picker.Item
-                    key={index}
-                    label={item.nama}
-                    value={item.m_daerah_id}
-                    style={{fontSize: 14}}
-                  />
-                );
-              })}
-            </Picker>
-          </View>
-
+          <SearchableDropdown
+            onItemSelect={item => {
+              getData(item.id);
+            }}
+            containerStyle={{padding: 5}}
+            onRemoveItem={(item, index) => {
+              setIdDaerah(item);
+            }}
+            itemStyle={{
+              padding: 10,
+              marginTop: 2,
+              backgroundColor: '#ddd',
+              borderColor: '#bbb',
+              borderWidth: 1,
+              borderRadius: 5,
+            }}
+            itemTextStyle={{color: '#222'}}
+            itemsContainerStyle={{height: '100%'}}
+            items={items}
+            resetValue={false}
+            textInputProps={{
+              placeholder: 'Cari Nama Daerah',
+              underlineColorAndroid: 'transparent',
+              style: {
+                padding: 12,
+                borderWidth: 1,
+                borderColor: '#ccc',
+                borderRadius: 5,
+              },
+            }}
+            listProps={{
+              nestedScrollEnabled: true,
+            }}
+          />
           <View
             style={{
               marginTop: hp('1%'),
               marginBottom: hp('2%'),
-            }}>
-            <View>
-              <TouchableOpacity
-                style={styles.buttonLogin}
-                onPress={() => {
-                  setCari(true);
-                }}>
-                <Text style={styles.textButton}>Cari</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+            }}
+          />
         </View>
         <View style={[styles.container, {flex: 1}]}>
-          {cari ? (
-            <>
-              <View style={{marginTop: 20}}>
-                <FlatList
-                  data={dataBuku}
-                  renderItem={renderItem}
-                  keyExtractor={(item, index) => index.toString()}
-                  showsVerticalScrollIndicator={false}
-                  // ListFooterComponent={renderFooter}
-                  // onEndReached={handleLoadMore}
-                  // onEndReachedThreshold={0}
-                />
-              </View>
-            </>
-          ) : null}
+          <View style={{marginTop: 20}}>
+            <FlatList
+              data={dataBuku}
+              renderItem={renderItem}
+              keyExtractor={(item, index) => index.toString()}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
         </View>
       </View>
     </>
